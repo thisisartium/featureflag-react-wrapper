@@ -1,6 +1,11 @@
-# Getting Started with Create React App
+# Getting Started with FeatureFlag React Wrapper
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+This app is both a demonstration and a library:
+
+* As a demonstration, it shows how you can configure a simple React component to be aware of feature flags
+* As a library, it provides functionality for safely wrapping a feature flag system in whatever tooling you want. We provide LaunchDarkly implementation by default.
 
 ## Available Scripts
 
