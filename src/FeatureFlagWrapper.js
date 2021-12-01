@@ -11,22 +11,25 @@ export const FeatureFlagProviderContext = createContext({
 const FeatureFlagWrapper = ({opts, children}) => {
     const flagValues = opts['flagValues'];
     const receiveFlagUpdater = opts['receiveFlagUpdater'];
+    const close = opts['close'];
 
     const [flags, setFlags] = useState(flagValues());
 
+    const updateFlags = () => {
+        let newValues = flagValues();
+        console.log("UPDATE_FLAGS", newValues);
+        setFlags(newValues);
+    };
+
+    receiveFlagUpdater(updateFlags);
+
     useEffect(() => {
-        const updateFlags = () => {
-            let newValues = flagValues();
-            console.log("UPDATE_FLAGS", newValues);
-            setFlags(newValues);
-        };
-
-        receiveFlagUpdater(updateFlags);
         return () => {
-            console.log("UNMOUNTING");
-        };
-
-    }, [setFlags]);
+            if (typeof close === 'function') {
+                close();
+            }
+        }
+    });
 
     return (
         <FeatureFlagProviderContext.Provider

@@ -1,8 +1,22 @@
-import {render, screen, waitFor} from '@testing-library/react';
-import {useContext, useState, useEffect} from 'react';
+import {act, render, screen} from '@testing-library/react';
+import {useContext, useEffect, useState} from 'react';
 import FeatureFlagWrapper, {FeatureFlagProviderContext} from "./FeatureFlagWrapper";
 
-test('renders learn react link', async () => {
+const TestComponent = ({flagName}) => {
+    console.log("TEST RENDERED");
+    const {flags} = useContext(FeatureFlagProviderContext);
+    const [flagValue, setFlagValue] = useState(flags[flagName]);
+    useEffect(() => {
+        console.log("FLAGS", flags);
+        setFlagValue(flags[flagName]);
+    }, [flags]);
+
+    return (
+        <div>Hello, {flagValue}</div>
+    );
+}
+
+const testFeatureFlags = (close) => {
     const flagValues = {personName: "bob", petName: "fluffy"};
     let flagsUpdated;
     const receiveFlagUpdater = (newUpdater) => {
@@ -11,35 +25,55 @@ test('renders learn react link', async () => {
 
     const opts = {
         flagValues: () => flagValues,
-        receiveFlagUpdater: receiveFlagUpdater
+        receiveFlagUpdater: receiveFlagUpdater,
+        close: close
     };
 
-    const TestComponent = ({flagName}) => {
-        const {flags} = useContext(FeatureFlagProviderContext);
-        const [flagValue, setFlagValue] = useState(flags[flagName]);
-        useEffect(() => {
-            setFlagValue(flags[flagName]);
-        }, [flags]);
-
-        return (
-            <div>Hello, {flagValue}</div>
-        );
+    return {
+        opts: opts, updateFlag: (n, v) => {
+            flagValues[n] = v;
+            flagsUpdated();
+        }
     }
+};
+
+test('renders learn react link', () => {
+    const {opts} = testFeatureFlags();
 
     render(<FeatureFlagWrapper opts={opts}>
         <TestComponent flagName={"personName"}/>
         <TestComponent flagName={"petName"}/>
     </FeatureFlagWrapper>);
-    const person = screen.getByText(/Hello, bob/i);
-    const pet = screen.getByText(/Hello, fluffy/i);
-    expect(person).toBeInTheDocument();
-    expect(pet).toBeInTheDocument();
+    expect(screen.getByText(/Hello, bob/i)).toBeInTheDocument();
+    expect(screen.getByText(/Hello, fluffy/i)).toBeInTheDocument();
+});
 
-    flagValues["personName"] = "larry";
-    flagsUpdated();
+test('renders different value on update out of band', async () => {
+    const {opts, updateFlag} = testFeatureFlags();
 
-    // await waitFor(() => {
-    //     const person2 = screen.getByText(/Hello, larry/i);
-    //     expect(person2).toBeInTheDocument();
-    // });
+    let component;
+    await act(async () => {
+        component = render(<FeatureFlagWrapper opts={opts}>
+            <TestComponent flagName={"personName"}/>
+            <TestComponent flagName={"petName"}/>
+        </FeatureFlagWrapper>);
+        updateFlag("personName", "larry");
+    });
+
+    expect(await component.findByText(/Hello, larry/i)).toBeInTheDocument();
+});
+
+
+test('closes on unmount', async () => {
+    let closed = false;
+    const {opts} = testFeatureFlags(() => closed = true);
+
+    const {unmount} = render(<FeatureFlagWrapper opts={opts}>
+        <TestComponent flagName={"personName"}/>
+    </FeatureFlagWrapper>);
+
+    expect(screen.getByText(/Hello, bob/i)).toBeInTheDocument();
+
+    unmount();
+    expect(closed).toBe(true);
 });
