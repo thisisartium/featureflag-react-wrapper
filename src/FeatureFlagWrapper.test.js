@@ -3,11 +3,9 @@ import {useContext, useEffect, useState} from 'react';
 import FeatureFlagWrapper, {FeatureFlagProviderContext} from "./FeatureFlagWrapper";
 
 const TestComponent = ({flagName}) => {
-    console.log("TEST RENDERED");
     const {flags} = useContext(FeatureFlagProviderContext);
     const [flagValue, setFlagValue] = useState(flags[flagName]);
     useEffect(() => {
-        console.log("FLAGS", flags);
         setFlagValue(flags[flagName]);
     }, [flags]);
 

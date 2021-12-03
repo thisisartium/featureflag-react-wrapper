@@ -1,14 +1,11 @@
-import {
-    createContext,
-    useState,
-    useEffect,
-} from 'react';
+import {createContext, useEffect, useState,} from 'react';
 
 export const FeatureFlagProviderContext = createContext({
     flags: {},
 });
 
 const FeatureFlagWrapper = ({opts, children}) => {
+    console.log("WRAPPER MOUNT");
     const flagValues = opts['flagValues'];
     const receiveFlagUpdater = opts['receiveFlagUpdater'];
     const close = opts['close'];
@@ -16,9 +13,8 @@ const FeatureFlagWrapper = ({opts, children}) => {
     const [flags, setFlags] = useState(flagValues());
 
     const updateFlags = () => {
-        let newValues = flagValues();
-        console.log("UPDATE_FLAGS", newValues);
-        setFlags(newValues);
+        setFlags(flagValues());
+        console.log("updateFlags");
     };
 
     receiveFlagUpdater(updateFlags);
@@ -26,7 +22,7 @@ const FeatureFlagWrapper = ({opts, children}) => {
     useEffect(() => {
         return () => {
             if (typeof close === 'function') {
-                close();
+                return close();
             }
         }
     });
