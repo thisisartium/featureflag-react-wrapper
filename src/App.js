@@ -1,59 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
 import FeatureFlagWrapper, {FeatureFlagProviderContext} from "./FeatureFlagWrapper";
-import * as LDClient from 'launchdarkly-js-client-sdk';
 import {useContext, useEffect, useState} from "react";
-
-function launchDarkly(clientId, userId) {
-    const userIdBase = {
-        key: userId ? userId : 'notLoggedIn',
-    };
-
-    const client = LDClient.initialize(
-        clientId,
-        userIdBase,
-    );
-
-    let eventsRegistered = false;
-    let ourUpdater;
-
-    return {
-        flagValues: () => client ? client.allFlags() : {},
-        receiveFlagUpdater: (updater) => {
-            ourUpdater = updater;
-            if (!eventsRegistered) {
-                console.log("CLIENT INITIALIZED");
-                client.on('ready', () => {
-                    try {
-                        console.log("READY");
-                        ourUpdater();
-                    } catch (e) {
-                        console.log("READY FAILED", e)
-                    }
-                });
-
-                client.on('change', () => {
-                    try {
-                        console.log("CHANGE");
-                        ourUpdater();
-                    } catch (e) {
-                        console.log("CHANGE FAILED", e);
-                    }
-                });
-                eventsRegistered = true;
-            } else {
-                console.log("CLIENT ALREADY INITIALIZED");
-            }
-        },
-        close: () => {
-            console.log("CLOSE");
-            return client.flush(function () {
-                client.close();
-            });
-        }
-    };
-}
-
+import launchDarkly from "./LaunchDarkly";
 
 function App() {
     console.log("APP MOUNT");
