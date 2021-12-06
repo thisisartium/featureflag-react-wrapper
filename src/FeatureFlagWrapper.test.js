@@ -47,7 +47,8 @@ test('renders learn react link', () => {
 });
 
 test('renders different value on update out of band', async () => {
-    const {opts, updateFlag} = testFeatureFlags();
+    let closedCount = 0;
+    const {opts, updateFlag} = testFeatureFlags(() => closedCount++);
 
     let component;
     await act(async () => {
@@ -59,6 +60,10 @@ test('renders different value on update out of band', async () => {
     });
 
     expect(await component.findByText(/Hello, larry/i)).toBeInTheDocument();
+    expect(closedCount).toBe(0);
+
+    component.unmount();
+    expect(closedCount).toBe(1);
 });
 
 

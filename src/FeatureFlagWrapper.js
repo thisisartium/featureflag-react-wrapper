@@ -5,7 +5,7 @@ export const FeatureFlagProviderContext = createContext({
 });
 
 const FeatureFlagWrapper = ({opts, children}) => {
-    console.log("WRAPPER MOUNT");
+    console.log("WRAPPER MOUNT", opts);
     const flagValues = opts['flagValues'];
     const receiveFlagUpdater = opts['receiveFlagUpdater'];
     const close = opts['close'];
@@ -25,7 +25,7 @@ const FeatureFlagWrapper = ({opts, children}) => {
                 return close();
             }
         }
-    });
+    }, [close]);
 
     return (
         <FeatureFlagProviderContext.Provider

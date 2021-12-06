@@ -4,7 +4,6 @@ import FeatureFlagWrapper, {FeatureFlagProviderContext} from "./FeatureFlagWrapp
 import * as LDClient from 'launchdarkly-js-client-sdk';
 import {useContext, useEffect, useState} from "react";
 
-
 function launchDarkly(clientId, userId) {
     const userIdBase = {
         key: userId ? userId : 'notLoggedIn',
@@ -49,13 +48,15 @@ function launchDarkly(clientId, userId) {
         close: () => {
             console.log("CLOSE");
             return client.flush(function () {
-                // client.close();
+                client.close();
             });
         }
     };
 }
 
+
 function App() {
+    console.log("APP MOUNT");
     const ldOpts = launchDarkly(process.env.REACT_APP_LAUNCH_DARKLY_CLIENT_ID);
 
     const OurApp = () => {
