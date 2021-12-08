@@ -2,11 +2,9 @@ import logo from './logo.svg';
 import './App.css';
 import FeatureFlagWrapper, {FeatureFlagProviderContext} from "./FeatureFlagWrapper";
 import {useContext, useEffect, useState} from "react";
-import launchDarkly from "./LaunchDarkly";
 
-function App() {
+const App = ({featureFlagOpts}) => {
     console.log("APP MOUNT");
-    const ldOpts = launchDarkly(process.env.REACT_APP_LAUNCH_DARKLY_CLIENT_ID);
 
     const OurApp = () => {
         const flagName = "green-text";
@@ -21,7 +19,7 @@ function App() {
         return (<div className="App">
             <header className="App-header">
                 <img src={logo} className="App-logo" alt="logo"/>
-                <p style={textGreen ? {color: 'green'} : undefined}>
+                <p aria-label={"default-text"} style={textGreen ? {color: 'green'} : {color: 'white'}}>
                     Edit <code>src/App.js</code> and save to reload.
                 </p>
                 <a
@@ -37,7 +35,7 @@ function App() {
     }
 
     return (
-        <FeatureFlagWrapper opts={ldOpts}>
+        <FeatureFlagWrapper opts={featureFlagOpts}>
             <OurApp/>
         </FeatureFlagWrapper>
     );

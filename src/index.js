@@ -3,10 +3,13 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import launchDarkly from "./LaunchDarkly";
+
+const launchDarklyOpts = launchDarkly(process.env.REACT_APP_LAUNCH_DARKLY_CLIENT_ID);
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <App featureFlagOpts={launchDarklyOpts}/>
   </React.StrictMode>,
   document.getElementById('root')
 );

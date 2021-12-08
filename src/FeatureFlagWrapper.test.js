@@ -1,6 +1,7 @@
 import {act, render, screen} from '@testing-library/react';
 import {useContext, useEffect, useState} from 'react';
 import FeatureFlagWrapper, {FeatureFlagProviderContext} from "./FeatureFlagWrapper";
+import testFeatureFlags from "./TestFeatureFlags";
 
 const TestComponent = ({flagName}) => {
     const {flags} = useContext(FeatureFlagProviderContext);
@@ -14,29 +15,10 @@ const TestComponent = ({flagName}) => {
     );
 }
 
-const testFeatureFlags = (close) => {
-    const flagValues = {personName: "bob", petName: "fluffy"};
-    let flagsUpdated;
-    const receiveFlagUpdater = (newUpdater) => {
-        flagsUpdated = newUpdater;
-    }
+const defaultFlags = {personName: "bob", petName: "fluffy"};
 
-    const opts = {
-        flagValues: () => flagValues,
-        receiveFlagUpdater: receiveFlagUpdater,
-        close: close
-    };
-
-    return {
-        opts: opts, updateFlag: (n, v) => {
-            flagValues[n] = v;
-            flagsUpdated();
-        }
-    }
-};
-
-test('renders learn react link', () => {
-    const {opts} = testFeatureFlags();
+test('renders multiple TestComponents', () => {
+    const {opts} = testFeatureFlags({defaultFlags});
 
     render(<FeatureFlagWrapper opts={opts}>
         <TestComponent flagName={"personName"}/>
@@ -48,7 +30,9 @@ test('renders learn react link', () => {
 
 test('renders different value on update out of band', async () => {
     let closedCount = 0;
-    const {opts, updateFlag} = testFeatureFlags(() => closedCount++);
+    const close = () => closedCount++;
+
+    const {opts, updateFlag} = testFeatureFlags({defaultFlags, close});
 
     let component;
     await act(async () => {
@@ -66,10 +50,11 @@ test('renders different value on update out of band', async () => {
     expect(closedCount).toBe(1);
 });
 
-
 test('closes on unmount', async () => {
     let closed = false;
-    const {opts} = testFeatureFlags(() => closed = true);
+    const close = () => closed = true;
+
+    const {opts} = testFeatureFlags({defaultFlags, close});
 
     const {unmount} = render(<FeatureFlagWrapper opts={opts}>
         <TestComponent flagName={"personName"}/>
